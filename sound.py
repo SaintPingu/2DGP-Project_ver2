@@ -3,6 +3,7 @@ if __name__ == "__main__":
 
 from tools import *
 
+_crnt_bgm_name = ""
 _crnt_bgm : Music = None
 _sounds : dict[str, Wav] = {}
 
@@ -16,6 +17,9 @@ def play_bgm(name, volume=128):
     _crnt_bgm = load_music_path(file_name)
     _crnt_bgm.set_volume(volume)
     _crnt_bgm.repeat_play()
+
+    global _crnt_bgm_name
+    _crnt_bgm_name = name
 
 def play_battle_bgm(index):
     file_name = 'battle_' + str(index)

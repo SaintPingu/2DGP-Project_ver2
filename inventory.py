@@ -37,6 +37,9 @@ class Inventory:
 
     def add_item(self, item):
         self.slot_items.append(item)
+    
+    def clear(self):
+        self.slot_items.clear()
 
 class Inven_Weapon(Inventory):
     weapons = ( "AP", "HP", "MUL", "NUCLEAR", "HOMING" )

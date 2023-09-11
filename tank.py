@@ -675,11 +675,11 @@ def handle_event(event):
             crnt_tank.fuel = Tank.MAX_FUEL
         elif event.key == SDLK_F10:
             gui.toggle_gui()
-        elif event.key == SDLK_F5:
-            tank_list[0].get_damage(100)
+        elif event.key == SDLK_F8:
+            tank_list[0].get_damage(999)
             select_tank(None)
-        elif event.key == SDLK_F6:
-            tank_list[1].get_damage(100)
+        elif event.key == SDLK_F9:
+            tank_list[1].get_damage(999)
             select_tank(None)
         elif event.key == SDLK_SPACE:
             if crnt_tank.is_locked:
@@ -799,12 +799,14 @@ def teleport(position):
         sound.play_sound('crash')
 
 def apply_difficulty(difficulty):
+    if not tank_list:
+        return
     import state_challenge_lobby
     if state_challenge_lobby._is_challenge:
-        for item in state_challenge_lobby._my_items:
+        for item in state_challenge_lobby.get_my_items():
             tank = tank_list[0]
             tank.add_item(item)
-        for item in state_challenge_lobby._enemy_items:
+        for item in state_challenge_lobby.get_enemy_items():
             tank = tank_list[1]
             tank.add_item(item)
     else:

@@ -18,10 +18,32 @@ _image_item_heal : Image
 _inven_item : inventory.Inven_Item
 _inven_item_enemy : inventory.Inven_Item
 
-_my_items = { 'double' }
-_enemy_items = { 'double' }
 _is_challenge = False
 _challenge_level = 0
+_my_items = { 
+    0 : ['double', 'TP', 'TP' ],
+    1 : ['double', 'extension', 'extension'],
+    2 : ['extension', 'TP', 'heal'],
+    3 : ['extension', 'extension', 'heal', 'heal', 'heal']
+}
+_enemy_items = { 
+    0 : ['double' ],
+    1 : ['double', 'double', 'extension'],
+    2 : ['double', 'double', 'extension', 'extension', 'heal', 'heal'],
+    3 : ['double', 'extension', 'extension', 'extension', 'extension', 'extension', 'extension' ]
+}
+_my_hp = {
+    0 : 100,
+    1 : 120,
+    2 : 140,
+    3 : 170,
+}
+_enemy_hp = {
+    0 : 100,
+    1 : 130,
+    2 : 160,
+    3 : 200,
+}
 
 class Button:
     def __init__(self, name : str, image : Image, position, composite = ''):
@@ -57,7 +79,49 @@ class Button:
         
         return True
 
+def get_map_index():
+    if _challenge_level == 3:
+        return 5
+    return _challenge_level + 1
+
+def get_difficulty():
+    if _challenge_level == 0:
+        return 'easy'
+    if _challenge_level == 1:
+        return 'normal'
+    if _challenge_level == 2:
+        return 'hard'
+    if _challenge_level == 3:
+        return 'god'
+    
+    return 'error'
+
+def get_my_items():
+    return _my_items[_challenge_level]
+
+def get_enemy_items():
+    return _enemy_items[_challenge_level]
+
+def update_inventory():
+    _inven_item.clear()
+    _inven_item_enemy.clear()
+    for item in get_my_items():
+        _inven_item.add_item(item)
+    
+    for item in get_enemy_items():
+        _inven_item_enemy.add_item(item)
+
+
+
+
+
+
+
+
+
+
 def enter():
+    sound.play_bgm('challenge', 128)
     global _is_challenge
     _is_challenge = True
 
@@ -79,11 +143,11 @@ def enter():
     global _font
     _font = load_font_path("DS-DIGIB", 60)
 
-    global _image_inventory, _image_item_double, _image_item_extension, _image_item_heal
-    #_image_inventory = load_image_path('inventory_item.png')
+    global _image_inventory, _image_item_double, _image_item_extension, _image_item_heal, _image_teleport
     _image_item_double = load_image_path('item_double.png')
     _image_item_extension = load_image_path('item_extension.png')
     _image_item_heal = load_image_path('item_heal.png')
+    _image_teleport = load_image_path('shell_teleport.png')
 
     global _images
     _images = []
@@ -91,17 +155,14 @@ def enter():
     _images.append(_image_item_double)
     _images.append(_image_item_extension)
     _images.append(_image_item_heal)
+    _images.append(_image_teleport)
 
     inventory.enter()
     global _inven_item, _inven_item_enemy
     _inven_item = inventory.Inven_Item((330, 350))
     _inven_item_enemy = inventory.Inven_Item((955, 350))
 
-    for item in _my_items:
-        _inven_item.add_item(item)
-    
-    for item in _enemy_items:
-        _inven_item_enemy.add_item(item)
+    update_inventory()
 
 def exit():
     global _buttons
@@ -131,8 +192,8 @@ def draw():
     for button in _buttons.values():
         button.draw()
 
-    _font.draw(200, 550, "HP : 100", (255, 255, 255))
-    _font.draw(825, 550, "HP : 150", (255, 255, 255))
+    _font.draw(200, 550, "HP : " + str(_my_hp[_challenge_level]), (255, 255, 255))
+    _font.draw(825, 550, "HP : " + str(_enemy_hp[_challenge_level]), (255, 255, 255))
 
     #_image_inventory.draw(330, 350)
     _inven_item.draw()
@@ -144,6 +205,8 @@ def update():
     pass
 
 def handle_events():
+    global _challenge_level
+    
     events = get_events()
     for event in events:
         if event.type == SDL_QUIT:
@@ -154,6 +217,10 @@ def handle_events():
                 for button in _buttons.values():
                     if button.check_select(point) == True:
                         break
+        elif event.type == SDL_KEYDOWN:
+            if SDLK_1 <= event.key <= SDLK_4:
+                _challenge_level = event.key - SDLK_0 - 1
+                update_inventory()
 
 def pause():
     pass

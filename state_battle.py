@@ -35,6 +35,15 @@ def enter():
     global map_index
     map_index = state_lobby.crnt_map_index + 1
 
+
+    import state_challenge_lobby
+    if state_challenge_lobby._is_challenge:
+        mode = 'PVE'
+        difficulty = state_challenge_lobby.get_difficulty()
+        map_index = state_challenge_lobby.get_map_index()
+    else:
+        difficulty = get_difficulty()
+
     object.enter()
     gmap.enter()
     shell.enter()
@@ -47,9 +56,9 @@ def enter():
     supply.enter()
     inventory.enter()
 
-    #map_index = -4
+    
     gmap.read_mapfile(map_index, mode)
-    tank.apply_difficulty(get_difficulty())
+    tank.apply_difficulty(difficulty)
 
     global _is_game_over
     _is_game_over = False
@@ -75,6 +84,7 @@ def exit():
     sound.exit()
     supply.exit()
 
+
 def update():
     global _is_game_over, _winner
 
@@ -96,7 +106,17 @@ def update():
 
         _is_game_over = True
         if ending.update() == False:
-            framework.change_state(state_title)
+            import state_challenge_lobby
+            if state_challenge_lobby._is_challenge:
+                if ending._winner == 0:
+                    state_challenge_lobby._challenge_level += 1
+                    if state_challenge_lobby._challenge_level >= 4:
+                        state_challenge_lobby._challenge_level = 0
+                        framework.change_state(state_title)
+                        return
+                framework.change_state(state_challenge_lobby)
+            else:
+                framework.change_state(state_title)
 
 def draw():
 

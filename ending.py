@@ -6,6 +6,7 @@ import state_lobby
 TIME_FOR_ENDING = 10
 TEXT_POS_Y = 800
 
+_winner = 0
 _ending_time = None
 _game_over_font : Font = None
 _font_rect : Rect = None
@@ -31,6 +32,8 @@ def update():
     return True
 
 def draw(winner):
+    global _winner
+    _winner = winner
     if state_lobby.crnt_map_index == 0:
         rgb = (255, 255, 255)
     elif state_lobby.crnt_map_index == 1:

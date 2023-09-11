@@ -156,6 +156,8 @@ def enter():
     global _font
     _font = load_font_path("DS-DIGIB", 38)
 
+    if sound._crnt_bgm_name != 'title':
+        sound.play_bgm('title')
     sound.add_sound('click')
 
 def exit():
