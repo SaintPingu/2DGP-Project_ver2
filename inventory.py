@@ -78,11 +78,11 @@ class Inven_Item(Inventory):
     item_table : dict = {}
     items : list
 
-    def __init__(self):
-        position = (345, 140)
+    def __init__(self, pos = (345, 140)):
+        position = pos
         self.item_used = False
         self.crnt_item = None
-        super().__init__(Inven_Item.background, position, (345 - 145, 140))
+        super().__init__(Inven_Item.background, position, (pos[0] - 145, pos[1]))
     
     def draw(self):
         super().draw()

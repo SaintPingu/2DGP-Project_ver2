@@ -64,9 +64,6 @@ class Tank(object.GroundObject):
         # inventory
         self.inven_weapon = inventory.Inven_Weapon()
         self.inven_item = inventory.Inven_Item()
-        self.inven_item.add_item("double")
-        self.inven_item.add_item("extension")
-        #self.inven_item.add_item("TP")
     
     def release(self):
         if tank_list: # death
@@ -802,6 +799,20 @@ def teleport(position):
         sound.play_sound('crash')
 
 def apply_difficulty(difficulty):
+    import state_challenge_lobby
+    if state_challenge_lobby._is_challenge:
+        for item in state_challenge_lobby._my_items:
+            tank = tank_list[0]
+            tank.add_item(item)
+        for item in state_challenge_lobby._enemy_items:
+            tank = tank_list[1]
+            tank.add_item(item)
+    else:
+        for tank in tank_list:
+            tank.add_item('double')
+            tank.add_item('extension')
+            tank.add_item('heal')
+            tank.add_item('TP')
     Tank_AI.error_range = Tank_AI.error_table[difficulty]
 
 def get_tanks():

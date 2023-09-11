@@ -4,6 +4,7 @@ if __name__ == "__main__":
 from tools import *
 import framework
 import state_battle
+import state_challenge_lobby
 import sound
 
 # global
@@ -57,12 +58,17 @@ class Button:
 
         global _crnt_mode, crnt_map_index, _crnt_difficulty, _image_maps
 
+        sound.play_sound('click')
+
         if self.name == "PVP":
             _crnt_mode = "PVP"
             set_check_pos()
         elif self.name == "PVE":
             _crnt_mode = "PVE"
             set_check_pos()
+        elif self.name == "CHALLENGE":
+            framework.change_state(state_challenge_lobby)
+            return True
         elif self.name == "left":
             crnt_map_index -= 1
         elif self.name == "right":
@@ -81,7 +87,6 @@ class Button:
 
         crnt_map_index = clamp(0, crnt_map_index, len(_image_maps) - 1)
 
-        sound.play_sound('click')
         return True
     
 def set_check_pos():
@@ -106,12 +111,14 @@ def enter():
     # button images
     image_pvp = load_image_path('lobby_button_pvp.png')
     image_pve = load_image_path('lobby_button_pve.png')
+    image_challenge = load_image_path('lobby_button_challenge.png')
     image_arrow = load_image_path('lobby_button_arrow.png')
     image_start = load_image_path('lobby_button_start.png')
     image_selection = load_image_path('lobby_button_selection.png')
     
     button_pvp = Button("PVP", image_pvp, (980, 750))
     button_pve = Button("PVE", image_pve, (980, 620))
+    button_challenge = Button("CHALLENGE", image_challenge, (1000, 880))
     button_left = Button("left", image_arrow, (200, 450), 'h')
     button_right = Button("right", image_arrow, (200 + 630, 450))
     button_start = Button("start", image_start, (515, 125))
@@ -124,6 +131,7 @@ def enter():
     _buttons = dict()
     _buttons[button_pvp.name] = button_pvp
     _buttons[button_pve.name] = button_pve
+    _buttons[button_challenge.name] = button_challenge
     _buttons[button_left.name] = button_left
     _buttons[button_right.name] = button_right
     _buttons[button_start.name] = button_start
