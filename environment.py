@@ -31,7 +31,6 @@ def enter(map_index, cloud_count=10):
     global _images_cloud
     _images_cloud = []
 
-    map_index = state_lobby.crnt_map_index + 1
     for i in range(_CLOUD_IMAGE_COUNT):
         image = load_image_path('clouds/map_' + str(map_index) + '/cloud_' + str(i) + '.png')
         if image.h >= _CLOUD_IMAGE_MAX_HEIGHT:

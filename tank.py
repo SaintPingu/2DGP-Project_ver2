@@ -18,6 +18,7 @@ image_tank_blue : Image
 image_barrel_blue : Image
 image_tank_red : Image
 image_barrel_red : Image
+image_power_arrow : Image
 
 gui_selection : gui.GUI_Select_Tank
 gui_launch : gui.GUI_LAUNCH
@@ -66,6 +67,7 @@ class Tank(object.GroundObject):
         self.inven_item = inventory.Inven_Item()
 
         self.test_shell = None
+        self.before_power = 0
     
     def release(self):
         if tank_list: # death
@@ -88,6 +90,23 @@ class Tank(object.GroundObject):
         theta = self.get_barrel_theta()
         self.image_barrel.rotate_draw(theta, *self.barrel_position)
         self.image.rotate_draw(self.theta, *self.center)
+
+        if not self.is_turn:
+            return
+        
+        t = 0
+        if self.before_power:
+            t = self.before_power
+        else:
+            t = gui_gauge.get_filled()
+        if t == 0:
+            return
+        
+        start = 955
+        end = 318
+        x = int(end * t) + start
+        image_power_arrow.draw(x, 100)
+        gmap.set_invalidate_rect((x, 100), 35,35)
 
     def create(self):
         self.is_created = True
@@ -126,9 +145,6 @@ class Tank(object.GroundObject):
     
     def add_item(self, item_name):
         self.inven_item.add_item(item_name)
-
-    def change_shell(self, shell_name):
-        self.crnt_shell = shell_name
 
     ##### Movement #####
     def deselect(self):
@@ -325,7 +341,8 @@ class Tank(object.GroundObject):
         self.dir = 0
         select_tank(None)
         shell.play_fire_sound(self.crnt_shell)
-        #supply.reset()
+        supply.reset()
+        self.before_power = gui_gauge.get_filled()
     
     def simulate(self, power):
         if self.test_shell:
@@ -611,13 +628,14 @@ prev_tank : Tank = None
 crnt_index = 0
 
 def enter():
-    global image_tank_green, image_barrel_green, image_tank_blue, image_barrel_blue, image_tank_red, image_barrel_red
+    global image_tank_green, image_barrel_green, image_tank_blue, image_barrel_blue, image_tank_red, image_barrel_red, image_power_arrow
     image_tank_green = load_image_path('tank_green.png')
     image_barrel_green = load_image_path('barrel_green.png')
     image_tank_blue = load_image_path('tank_blue.png')
     image_barrel_blue = load_image_path('barrel_blue.png')
     image_tank_red = load_image_path('tank_red.png')
     image_barrel_red = load_image_path('barrel_red.png')
+    image_power_arrow = load_image_path('power_arrow.png')
 
     global gui_selection, gui_launch, gui_gauge
     selection_arrow = load_image_path('selection_arrow.png')
@@ -633,13 +651,14 @@ def enter():
     crnt_index = 0
 
 def exit():
-    global  image_tank_green, image_barrel_green, image_tank_blue, image_barrel_blue, image_tank_red, image_barrel_red, gui_selection
+    global  image_tank_green, image_barrel_green, image_tank_blue, image_barrel_blue, image_tank_red, image_barrel_red, image_power_arrow
     del image_tank_green
     del image_barrel_green
     del image_tank_blue
     del image_barrel_blue
     del image_tank_red
     del image_barrel_red
+    del image_power_arrow
 
     global tank_list, crnt_tank, _wait_count
     tank_list.clear()

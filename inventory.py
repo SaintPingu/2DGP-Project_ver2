@@ -68,7 +68,7 @@ class Inven_Weapon(Inventory):
 
         from gui import gui_weapon
         shell_name = self.slot_items[index]
-        target_tank.change_shell(shell_name)
+        target_tank.crnt_shell = shell_name
 
         gui_weapon.set_image(shell_name)
 

@@ -323,6 +323,9 @@ def add_shell(shell_name, head_position, theta, power = 1, item = None, target_p
         fired_shells.append(shell)
         object.add_object(shell)
 
+        if item == "TP":
+            break
+        
         if shell_name == "MUL":
             for n in range(3):
                 t = 0.05 * (n+1)

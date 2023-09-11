@@ -177,7 +177,9 @@ def draw():
     pass
 
 def reset():
-    create_ship()
+    if random.randint(0, 2) == 0:
+        pass
+        #create_ship()
 
 def create_ship():
     global _ship, _is_supply
