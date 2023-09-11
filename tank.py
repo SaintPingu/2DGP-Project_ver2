@@ -64,6 +64,8 @@ class Tank(object.GroundObject):
         # inventory
         self.inven_weapon = inventory.Inven_Weapon()
         self.inven_item = inventory.Inven_Item()
+
+        self.test_shell = None
     
     def release(self):
         if tank_list: # death
@@ -125,12 +127,19 @@ class Tank(object.GroundObject):
     def add_item(self, item_name):
         self.inven_item.add_item(item_name)
 
+    def change_shell(self, shell_name):
+        self.crnt_shell = shell_name
+
     ##### Movement #####
     def deselect(self):
         self.is_turn = False
         self.is_locked = False
         self.fuel = Tank.MAX_FUEL
         gui.reset_degree()
+
+        if self.test_shell:
+            for rect in self.test_shell.test_rects:
+                gmap.add_invalidate(rect.center, rect.width + 5, rect.height + 5)
         
     def select(self):
         self.is_turn = True
@@ -293,6 +302,7 @@ class Tank(object.GroundObject):
     def unlock(self):
         self.is_locked = False
         gui_launch.set_state('locked')
+        self.test_shell = None
     
     def toggle_lock(self):
         if self.is_locked:
@@ -316,6 +326,18 @@ class Tank(object.GroundObject):
         select_tank(None)
         shell.play_fire_sound(self.crnt_shell)
         #supply.reset()
+    
+    def simulate(self, power):
+        if self.test_shell:
+            for rect in self.test_shell.test_rects:
+                gmap.add_invalidate(rect.center, rect.width + 5, rect.height + 5)
+
+        self.test_shell = shell.Shell(self.crnt_shell, self.get_barrel_head(), self.get_barrel_theta(), is_simulation=True)
+        self.test_shell.set_test()
+        self.test_shell.set_speed(power)
+        self.test_shell.t = 0
+        for i in range(10):
+            self.test_shell.update()
     ##########
 
 
@@ -638,7 +660,9 @@ def update():
             if len(tank_list) <= 1:
                 from state_battle import set_winner
                 set_state("Ending")
-                if type(tank_list[0]) == Tank:
+                if len(tank_list) <= 0:
+                    set_winner(-1)
+                elif type(tank_list[0]) == Tank:
                     set_winner(0)
                 else:
                     set_winner(-1)
@@ -652,7 +676,9 @@ def update():
             select_next_tank()
             gmap.env.randomize_wind()
             _wait_count = 0
-    
+    elif gui_gauge.is_fill:
+        crnt_tank.simulate(gui_gauge.get_filled())
+
     return True
 
 def handle_event(event):

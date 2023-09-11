@@ -189,6 +189,7 @@ class GUI_GUAGE(GUI):
     def set_fill(self, amount):
         self.t = amount
         self.t = clamp(0, self.t, 1)
+        
     def get_filled(self):
         return self.t
 

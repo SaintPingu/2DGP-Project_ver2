@@ -73,6 +73,7 @@ class Shell(object.GameObject):
 
         self.vector = Vector2.right().get_rotated(theta)
         self.speed, self.shell_damage, self.explosion_damage, self.explosion_radius = get_attributes(shell_name)
+        self.origin_speed = self.speed
         if self.speed <= 0:
             raise Exception
 
@@ -95,6 +96,14 @@ class Shell(object.GameObject):
         self.delay = delay
         self.sub = False
         self.is_teleport = False
+        self.is_test = False
+        self.test_rects = []
+
+    def set_speed(self, power):
+        self.speed = self.origin_speed * power
+
+    def set_test(self):
+        self.is_test = True
 
     def draw(self):
         if self.delay > 0:
@@ -193,6 +202,8 @@ class Shell(object.GameObject):
         detected_cells = gmap.get_detected_cells(rect_detection)
         if is_debug_mode():
             gmap.draw_debug_rect(rect_detection)
+        elif self.is_test:
+            self.test_rects.append(rect_detection)
 
         for detected_cell in detected_cells:
             if not gmap.out_of_range_cell(*detected_cell) and gmap.get_block_cell(detected_cell):
@@ -210,7 +221,7 @@ class Shell(object.GameObject):
             gmap.set_invalidate_rect(self.center, self.img_shell.w, self.img_shell.h, square=True, grid_size=0)
 
     def explosion(self, head : Vector2):
-        if self.is_simulation:
+        if self.is_simulation or self.is_test:
             return
 
         if self.is_teleport:
@@ -373,7 +384,7 @@ def get_attributes(shell_name : str) -> tuple[float, float]:
         explosion_damage = 30
         explosion_radius = 22
     elif shell_name == "TP":
-        speed = 300
+        speed = 330
     elif shell_name == "HOMING":
         speed = 400
         shell_damage = 15

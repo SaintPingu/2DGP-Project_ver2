@@ -538,10 +538,13 @@ def get_highest_ground_cell(x, y, max_length = float('inf'), is_cell=False):
 
 
 ##### DEBUG #####
+def draw_rect(rect):
+    draw_rectangle(rect.origin[0], rect.origin[1], rect.origin[0]+rect.width, rect.origin[1]+rect.height)
+
 def draw_debugs():
     if is_debug_mode():
         for rect in _rect_debug_list:
-            draw_rectangle(rect.origin[0], rect.origin[1], rect.origin[0]+rect.width, rect.origin[1]+rect.height)
+            draw_rect(rect)
             del rect
         _rect_debug_list.clear()
         

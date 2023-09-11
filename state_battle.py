@@ -127,6 +127,13 @@ def draw():
     sprite.draw()
     gmap.draw_debugs()
 
+    t = tank.crnt_tank
+    if t:
+        shell = t.test_shell
+        if shell:
+            for rect in shell.test_rects:
+                gmap.draw_rect(rect)
+
     if _is_game_over:
         ending.draw(_winner)
     
