@@ -117,7 +117,7 @@ class Inven_Item(Inventory):
                 gui.gui_weapon.set_item(None)
                 return
             self.item_used = True
-            tank.hp += 15
+            tank.hp += 35
             tank.hp = clamp(0, tank.hp, tank.max_hp)
             
             gui.gui_weapon.set_item(None)

@@ -332,8 +332,8 @@ class Tank_AI(Tank):
         3 : 0.45,
         4 : 0.3,
         5 : 0.2,
-        6 : 0.1,
-        7 : 0.05,
+        6 : 0.05,
+        7 : 0.02,
     }
     error_table = {
         "easy" : 4,
@@ -522,9 +522,6 @@ class Tank_AI(Tank):
         # get impact point
         while self.count_update < Tank_AI.MAX_RUN_AI_SECOND:
             result = self.virtual_shell.update()
-            # if self.degree_level >= 5:
-            #     self.virtual_shell.draw()
-            #     update_canvas()
 
             if result is not True:
                 self.set_barrel_pos()
@@ -534,7 +531,7 @@ class Tank_AI(Tank):
                 distance = vec_distance.get_norm()
 
                 if type(result) == Tank: # tank on point
-                    if distance < (self.detect_radius - 5): # n(==5) is correction value
+                    if distance < (self.detect_radius - 3): # n(==5) is correction value
                         self.fire(self.start_degree)
                         return
 

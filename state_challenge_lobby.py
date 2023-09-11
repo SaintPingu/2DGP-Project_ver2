@@ -24,13 +24,13 @@ _my_items = {
     0 : ['double', 'TP', 'TP' ],
     1 : ['double', 'extension', 'extension'],
     2 : ['extension', 'TP', 'heal'],
-    3 : ['extension', 'extension', 'heal', 'heal', 'heal']
+    3 : ['double', 'extension', 'extension', 'heal', 'heal', 'heal']
 }
 _enemy_items = { 
     0 : ['double' ],
     1 : ['double', 'double', 'extension'],
     2 : ['double', 'double', 'extension', 'extension', 'heal', 'heal'],
-    3 : ['double', 'extension', 'extension', 'extension', 'extension', 'extension', 'extension' ]
+    3 : ['double', 'double', 'double', 'extension', 'extension', 'extension' ]
 }
 _my_hp = {
     0 : 100,
@@ -163,6 +163,7 @@ def enter():
     _inven_item_enemy = inventory.Inven_Item((955, 350))
 
     update_inventory()
+    sound.add_sound('click')
 
 def exit():
     global _buttons
@@ -192,8 +193,13 @@ def draw():
     for button in _buttons.values():
         button.draw()
 
+    _font.draw(1000, 830, "Lv-" + str(_challenge_level + 1), (255, 255, 0))
+
     _font.draw(200, 550, "HP : " + str(_my_hp[_challenge_level]), (255, 255, 255))
-    _font.draw(825, 550, "HP : " + str(_enemy_hp[_challenge_level]), (255, 255, 255))
+    if _challenge_level < 3:
+        _font.draw(825, 550, "HP : " + str(_enemy_hp[_challenge_level]), (255, 255, 255))
+    else:
+        _font.draw(825, 550, "HP : ???", (255, 255, 255))
 
     #_image_inventory.draw(330, 350)
     _inven_item.draw()

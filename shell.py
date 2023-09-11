@@ -139,7 +139,9 @@ class Shell(object.GameObject):
         # out of range
         a = rect.right < rect.width // 2
         b = rect.left > SCREEN_WIDTH - rect.width // 2
-        if a or b or rect.top <= MIN_HEIGHT:
+        c = rect.bottom <= MIN_HEIGHT
+        d = rect.top <= MIN_HEIGHT
+        if a or b or c or d:
             if a:
                 self.set_center((SCREEN_WIDTH - rect.width // 2, self.center.y))
                 self.origin.x = SCREEN_WIDTH + self.origin.x
@@ -147,9 +149,9 @@ class Shell(object.GameObject):
                 self.set_center((rect.width // 2, self.center.y))
                 self.origin.x = self.origin.x - SCREEN_WIDTH
             else:
+                self.explosion(self.get_head())
                 return False
             rect = self.get_square()
-            #return False
         
         head = self.get_head()
         if self.prev_head is None:
