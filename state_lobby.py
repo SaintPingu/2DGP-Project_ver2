@@ -9,7 +9,7 @@ import sound
 import control
 
 # global
-NUM_OF_MAP = 4
+NUM_OF_MAP = 5
 _crnt_mode : str
 _crnt_difficulty : str
 crnt_map_index = 0
@@ -57,7 +57,7 @@ class Button:
         if not point_in_rect(point, self.rect):
             return False
 
-        global _crnt_mode, crnt_map_index, _crnt_difficulty, _image_maps
+        global _crnt_mode, _crnt_difficulty, _image_maps
 
         sound.play_sound('click')
 
@@ -85,11 +85,56 @@ class Button:
                 set_check_pos()
         else:
             assert(0)
-
-        crnt_map_index = clamp(0, crnt_map_index, len(_image_maps) - 1)
-
         return True
     
+
+
+class SpriteSheet:
+    def __init__(self, image, max_frame_row, max_frame_col, animation_interval):
+        self.frame = 0
+        self.image = image
+        self.max_frame_row = max_frame_row
+        self.max_frame_col = max_frame_col
+        self.max_frame = max_frame_row * max_frame_col
+
+        self.image_width = image.w // max_frame_col
+        self.image_height = image.h // max_frame_row
+
+        self.animation_called = 0
+        self.animation_interval = animation_interval
+    
+    def draw(self, position):
+        frame_x = 0 * self.image_width
+        frame_y = 6 * self.image_height
+        self.image.clip_draw(frame_x, frame_y, self.image_width, self.image_height, position[0], position[1])
+    
+    def animate(self):
+        self.animation_called += 50 * framework.frame_time
+        if self.animation_called >= self.animation_interval:
+            self.animation_called = 0
+            self.frame = (self.frame + 1) % self.max_frame
+    
+    def check_terminated(self):
+        if self.animation_called == 0 and self.frame == 0:
+            return True
+        return False
+
+
+class Effect():
+    def __init__(self, sprite_sheet : SpriteSheet, position):
+        self.sprite_sheet = sprite_sheet
+        self.position = position
+    
+    def draw(self):
+        self.sprite_sheet.draw(self.position)
+
+    def animate(self):
+        self.sprite_sheet.animate()
+        if self.sprite_sheet.check_terminated():
+            return False
+        return True
+
+effects = []
 
 class MAP():
     def __init__(self):
@@ -109,15 +154,21 @@ class MAP():
             self.t = 0
             self.speed = 0.1
             self.index = self.next_index
+            global crnt_map_index
+            crnt_map_index = self.index
+            if self.index == NUM_OF_MAP - 1:
+                crnt_map_index = random.randint(0, NUM_OF_MAP + 1)
+                if crnt_map_index >= NUM_OF_MAP:
+                    crnt_map_index = NUM_OF_MAP - 1
 
     def draw_a(self, index, t1, t2):
-        y = _position_map[1]
         x = _position_map[0] - 520//2 + ((520//2) * t1)
+        y = _position_map[1]
         _image_maps[index].clip_draw(0, 0, int(SCREEN_WIDTH * t1), SCREEN_HEIGHT, x, y, int(520 * t1), 500)
     
     def draw_b(self, index, t1, t2):
-        y = _position_map[1]
         x = _position_map[0] + 520//2 - ((520//2) * t2)
+        y = _position_map[1]
         _image_maps[index].clip_draw(int(SCREEN_WIDTH * t1), 0, int(SCREEN_WIDTH * t2), SCREEN_HEIGHT, x, y, int(520 * t2), 500)
 
     def draw(self):
@@ -131,6 +182,11 @@ class MAP():
                 t2 = self.t
                 self.draw_a(prev, t1, t2)
                 self.draw_b(next, t1, t2)
+                
+                for i, effect in enumerate(effects):
+                    t = i / len(effects)
+                    y = _position_map[1] - _position_map[1]//2 + 500 * t
+                    effect.position = (_position_map[0] + 520//2 - ((520) * t2), y)
             else:
                 next = self.index
                 prev = self.next_index
@@ -138,14 +194,24 @@ class MAP():
                 t1 = self.t
                 self.draw_b(next, t1, t2)
                 self.draw_a(prev, t1, t2)
+                for i, effect in enumerate(effects):
+                    t = i / len(effects)
+                    y = _position_map[1] - _position_map[1]//2 + 500 * t
+                    effect.position = (_position_map[0] + 520//2 - ((520) * t2), y)
+            for effect in effects:
+                effect.draw()
             
 
             
 
     def change(self, dir):
         next_index = self.index + dir
-        if next_index < 0 or next_index >= len(_image_maps):
-            return
+        # if next_index < 0 or next_index >= len(_image_maps):
+        #     return
+        if next_index < 0:
+            next_index = NUM_OF_MAP - 1
+        elif next_index >= NUM_OF_MAP:
+            next_index = 0
         
         self.next_index = next_index
 
@@ -209,8 +275,9 @@ def enter():
     # map images
     global _image_maps
     _image_maps = []
-    for i in range(NUM_OF_MAP):
+    for i in range(NUM_OF_MAP - 1):
         _image_maps.append(load_image_path("map_" + str(i + 1) + ".png"))
+    _image_maps.append(load_image_path("map_random.png"))
 
     global map
     map = MAP()
@@ -224,6 +291,12 @@ def enter():
 
     global _font
     _font = load_font_path("DS-DIGIB", 38)
+
+    global effects
+    effect_image = load_image_path('Impact.png')
+    effect_sprite_sheet = SpriteSheet(effect_image, 8, 8, 5)
+    for i in range(10):
+        effects.append(Effect(effect_sprite_sheet, (0,0)))
 
     if sound._crnt_bgm_name != 'title':
         sound.play_bgm('title')
@@ -246,6 +319,10 @@ def exit():
 
     global _font
     del _font
+
+    for effect in effects:
+        del effect
+    effects.clear()
 
 def update():
     map.update()

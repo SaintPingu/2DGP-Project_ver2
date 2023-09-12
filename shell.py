@@ -310,6 +310,9 @@ class Shell_Homing(Shell):
 
 class Shell_Fire(Shell):
     detect_distance = 250
+    def set_item(self, item):
+        self.item = item
+
     def set_parent(self):
         self.is_child = False
 
@@ -328,10 +331,11 @@ class Shell_Fire(Shell):
             return
         
         head = self.get_head()
-        collision_point = head + dir * Shell_Fire.detect_distance
-        detected_cell = gmap.get_cell(collision_point)
+        head_end = head + dir * Shell_Fire.detect_distance
+        vectors = gmap.get_vectors(head, head_end)
+        gmap.draw_debug_vectors(vectors)
 
-        if not gmap.out_of_range_cell(*detected_cell) and gmap.get_block_cell(detected_cell):
+        if gmap.check_collision_vectors(vectors):
             self.explosion(head)
 
             theta = -Vector2.right().get_theta(dir)
@@ -339,6 +343,9 @@ class Shell_Fire(Shell):
                 t = 0.15 * (i+1)
                 shell_1 = Shell_Fire("FIRE", head, theta + t, 0.6, delay=0)
                 shell_2 = Shell_Fire("FIRE", head, theta - t, 0.6, delay=0)
+                if self.item == 'extension':
+                    shell_1.explosion_radius *= 2
+                    shell_2.explosion_radius *= 2
                 shell_1.set_sub()
                 shell_2.set_sub()
                 shell_1.set_child()
@@ -368,11 +375,14 @@ def add_shell(shell_name, head_position, theta, power = 1, item = None, target_p
 
     for i in range(count_shot):
 
-        if shell_name == "HOMING":
+        if item == "TP":
+            shell = Shell("TP", head_position, theta, power, delay=delay)
+        elif shell_name == "HOMING":
             shell = Shell_Homing(shell_name, head_position, theta, target_pos, power, delay=delay, id=i)
         elif shell_name == "FIRE":
             shell = Shell_Fire(shell_name, head_position, theta, power, delay=delay)
             shell.set_parent()
+            shell.set_item(item)
         else:
             shell = Shell(shell_name, head_position, theta, power, delay=delay)
 
@@ -387,7 +397,7 @@ def add_shell(shell_name, head_position, theta, power = 1, item = None, target_p
         
         if shell_name == "MUL":
             for n in range(3):
-                t = 0.3 * (n+1)
+                t = 0.1 * (n+1)
                 shell_1 = Shell(shell_name, position, theta + t, power, delay=delay)
                 shell_2 = Shell(shell_name, position, theta - t, power, delay=delay)
                 shell_1.set_sub()
@@ -439,7 +449,7 @@ def get_attributes(shell_name : str) -> tuple[float, float]:
     elif shell_name == "MUL":
         speed = 300
         shell_damage = 5
-        explosion_damage = 10
+        explosion_damage = 8
         explosion_radius = 4
     elif shell_name == "NUCLEAR":
         speed = 375
@@ -456,7 +466,7 @@ def get_attributes(shell_name : str) -> tuple[float, float]:
     elif shell_name == "FIRE":
         speed = 375
         shell_damage = 1
-        explosion_damage = 4
+        explosion_damage = 12
         explosion_radius = 6
     else:
         assert(0)
