@@ -4,6 +4,7 @@ import state_lobby
 import state_battle
 import sound
 import inventory
+import control
 
 _background : Image
 
@@ -121,6 +122,11 @@ def update_inventory():
 
 
 def enter():
+    control.add_control('1', '레벨 1')
+    control.add_control('2', '레벨 2')
+    control.add_control('3', '레벨 3')
+    control.add_control('4', '레벨 4')
+    
     sound.play_bgm('challenge', 128)
     global _is_challenge
     _is_challenge = True
@@ -166,6 +172,8 @@ def enter():
     sound.add_sound('click')
 
 def exit():
+    control.clear()
+
     global _buttons
     for button in _buttons.values():
         button.release()

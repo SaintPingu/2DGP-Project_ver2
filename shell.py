@@ -24,13 +24,15 @@ def enter():
     img_shell_nuclear = load_image_path('shell_nuclear.png')
     img_shell_teleport = load_image_path('shell_teleport.png')
     img_shell_homing = load_image_path('shell_homing.png')
-    SHELLS = { "AP" : img_shell_ap, "HP" : img_shell_hp, "MUL" : img_shell_mul, "NUCLEAR" : img_shell_nuclear, "TP" : img_shell_teleport, "HOMING" : img_shell_homing}
+    img_shell_fire = load_image_path('shell_fire.png')
+    SHELLS = { "AP" : img_shell_ap, "HP" : img_shell_hp, "MUL" : img_shell_mul, "NUCLEAR" : img_shell_nuclear, "TP" : img_shell_teleport, "HOMING" : img_shell_homing, "FIRE" : img_shell_fire}
     EXPLOSIONS = {
         "AP" : "Explosion",
         "HP" : "Explosion",
         "MUL" : "Explosion",
         "NUCLEAR" : "Explosion_Nuclear",
         "HOMING" : "Explosion",
+        "FIRE" : "Explosion",
     }
 
     fired_shells = []
@@ -59,6 +61,7 @@ class Shell(object.GameObject):
         "NUCLEAR" : "Nuclear",
         "TP" : "Teleport",
         "HOMING" : "Homing",
+        "FIRE" : "Fire",
     }
     MIN_POWER = 0.2
     SIMULATION_t = 0.15
@@ -302,6 +305,59 @@ class Shell_Homing(Shell):
         gui.add_gui(self.gui_lock, 0)
     
 
+
+
+
+class Shell_Fire(Shell):
+    detect_distance = 250
+    def set_parent(self):
+        self.is_child = False
+
+    def set_child(self):
+        self.is_child = True
+
+    def move(self):
+        super().move()
+
+        if not self.is_child:
+            self.detect_ground()
+    
+    def detect_ground(self):
+        dir = self.vector.normalized()
+        if dir.y >= -0.5:
+            return
+        
+        head = self.get_head()
+        collision_point = head + dir * Shell_Fire.detect_distance
+        detected_cell = gmap.get_cell(collision_point)
+
+        if not gmap.out_of_range_cell(*detected_cell) and gmap.get_block_cell(detected_cell):
+            self.explosion(head)
+
+            theta = -Vector2.right().get_theta(dir)
+            for i in range(3):
+                t = 0.15 * (i+1)
+                shell_1 = Shell_Fire("FIRE", head, theta + t, 0.6, delay=0)
+                shell_2 = Shell_Fire("FIRE", head, theta - t, 0.6, delay=0)
+                shell_1.set_sub()
+                shell_2.set_sub()
+                shell_1.set_child()
+                shell_2.set_child()
+                fired_shells.append(shell_1)
+                fired_shells.append(shell_2)
+                object.add_object(shell_1)
+                object.add_object(shell_2)
+            return True
+        
+
+
+
+
+
+
+
+
+
 fired_shells : list[Shell]
 
 def add_shell(shell_name, head_position, theta, power = 1, item = None, target_pos=None):
@@ -314,6 +370,9 @@ def add_shell(shell_name, head_position, theta, power = 1, item = None, target_p
 
         if shell_name == "HOMING":
             shell = Shell_Homing(shell_name, head_position, theta, target_pos, power, delay=delay, id=i)
+        elif shell_name == "FIRE":
+            shell = Shell_Fire(shell_name, head_position, theta, power, delay=delay)
+            shell.set_parent()
         else:
             shell = Shell(shell_name, head_position, theta, power, delay=delay)
 
@@ -328,7 +387,7 @@ def add_shell(shell_name, head_position, theta, power = 1, item = None, target_p
         
         if shell_name == "MUL":
             for n in range(3):
-                t = 0.05 * (n+1)
+                t = 0.3 * (n+1)
                 shell_1 = Shell(shell_name, position, theta + t, power, delay=delay)
                 shell_2 = Shell(shell_name, position, theta - t, power, delay=delay)
                 shell_1.set_sub()
@@ -350,6 +409,7 @@ def add_shell(shell_name, head_position, theta, power = 1, item = None, target_p
         shell.img_shell = get_shell_image("TP")
         shell.speed = get_attributes("TP")[0] * power
             
+
 
 
 def delete_shell(shell : Shell):
@@ -393,6 +453,11 @@ def get_attributes(shell_name : str) -> tuple[float, float]:
         shell_damage = 15
         explosion_damage = 2
         explosion_radius = 5
+    elif shell_name == "FIRE":
+        speed = 375
+        shell_damage = 1
+        explosion_damage = 4
+        explosion_radius = 6
     else:
         assert(0)
 

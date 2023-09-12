@@ -42,7 +42,7 @@ class Inventory:
         self.slot_items.clear()
 
 class Inven_Weapon(Inventory):
-    weapons = ( "AP", "HP", "MUL", "NUCLEAR", "HOMING" )
+    weapons = ( "AP", "HP", "MUL", "NUCLEAR", "HOMING", "FIRE" )
     background : Image
     def __init__(self):
         position = (555, 140)

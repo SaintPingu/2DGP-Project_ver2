@@ -6,6 +6,7 @@ import framework
 import state_battle
 import state_challenge_lobby
 import sound
+import control
 
 # global
 NUM_OF_MAP = 4
