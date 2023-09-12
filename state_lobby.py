@@ -71,9 +71,9 @@ class Button:
             framework.change_state(state_challenge_lobby)
             return True
         elif self.name == "left":
-            crnt_map_index -= 1
+            map.change(-1)
         elif self.name == "right":
-            crnt_map_index += 1
+            map.change(1)
         elif self.name == "start":
             sound.stop_bgm()
             framework.change_state(state_battle)
@@ -90,6 +90,71 @@ class Button:
 
         return True
     
+
+class MAP():
+    def __init__(self):
+        self.index = 0
+        self.next_index = 0
+        self.t = 0
+        self.width = 520
+        self.speed = 0.1
+    
+    def update(self):
+        if self.index == self.next_index:
+            return
+        
+        self.t += framework.frame_time * self.speed
+        self.speed += framework.frame_time * 2
+        if self.t >= 1:
+            self.t = 0
+            self.speed = 0.1
+            self.index = self.next_index
+
+    def draw_a(self, index, t1, t2):
+        y = _position_map[1]
+        x = _position_map[0] - 520//2 + ((520//2) * t1)
+        _image_maps[index].clip_draw(0, 0, int(SCREEN_WIDTH * t1), SCREEN_HEIGHT, x, y, int(520 * t1), 500)
+    
+    def draw_b(self, index, t1, t2):
+        y = _position_map[1]
+        x = _position_map[0] + 520//2 - ((520//2) * t2)
+        _image_maps[index].clip_draw(int(SCREEN_WIDTH * t1), 0, int(SCREEN_WIDTH * t2), SCREEN_HEIGHT, x, y, int(520 * t2), 500)
+
+    def draw(self):
+        if self.index == self.next_index:
+            _image_maps[self.index].draw(*_position_map, 520, 500)
+        else:
+            if self.index < self.next_index:
+                prev = self.index
+                next = self.next_index
+                t1 = 1 - self.t
+                t2 = self.t
+                self.draw_a(prev, t1, t2)
+                self.draw_b(next, t1, t2)
+            else:
+                next = self.index
+                prev = self.next_index
+                t2 = 1 - self.t
+                t1 = self.t
+                self.draw_b(next, t1, t2)
+                self.draw_a(prev, t1, t2)
+            
+
+            
+
+    def change(self, dir):
+        next_index = self.index + dir
+        if next_index < 0 or next_index >= len(_image_maps):
+            return
+        
+        self.next_index = next_index
+
+    
+
+map : MAP
+
+
+
 def set_check_pos():
     global _crnt_mode, _check_pos_mode, _check_pos_diff
     if _crnt_mode == "PVP" or _crnt_mode == "PVE":
@@ -147,6 +212,9 @@ def enter():
     for i in range(NUM_OF_MAP):
         _image_maps.append(load_image_path("map_" + str(i + 1) + ".png"))
 
+    global map
+    map = MAP()
+
     # set globals
     global _crnt_mode, crnt_map_index, _crnt_difficulty
     _crnt_mode = "PVP"
@@ -180,12 +248,12 @@ def exit():
     del _font
 
 def update():
-    pass
+    map.update()
 
 def draw():
     clear_canvas()
     _background.draw(SCREEN_WIDTH//2, SCREEN_HEIGHT//2)
-    _image_maps[crnt_map_index].draw(*_position_map, 520, 500)
+    map.draw()
 
     global _buttons
     for button in _buttons.values():
