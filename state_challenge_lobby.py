@@ -22,16 +22,16 @@ _inven_item_enemy : inventory.Inven_Item
 _is_challenge = False
 _challenge_level = 0
 _my_items = { 
-    0 : ['double', 'TP', 'TP' ],
+    0 : ['double', 'STRIKE', 'TP', 'TP' ],
     1 : ['double', 'extension', 'extension'],
-    2 : ['extension', 'TP', 'heal'],
+    2 : ['extension', 'STRIKE', 'TP', 'heal'],
     3 : ['double', 'extension', 'extension', 'heal', 'heal', 'heal']
 }
 _enemy_items = { 
     0 : ['double' ],
-    1 : ['double', 'double', 'extension'],
+    1 : ['double', 'double', 'extension', 'STRIKE'],
     2 : ['double', 'double', 'extension', 'extension', 'heal', 'heal'],
-    3 : ['double', 'double', 'double', 'extension', 'extension', 'extension' ]
+    3 : ['double', 'double', 'double', 'extension', 'extension', 'extension', 'STRIKE' ]
 }
 _my_hp = {
     0 : 100,

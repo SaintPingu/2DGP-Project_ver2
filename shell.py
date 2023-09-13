@@ -8,6 +8,7 @@ import sprite
 import tank
 import sound
 import framework
+from tools import Vector2
 
 DEFAULT_SHELL = "AP"
 
@@ -28,7 +29,8 @@ def enter():
     img_shell_valkyrie = load_image_path('shell_valkyrie.png')
     img_shell_digger = load_image_path('shell_digger.png')
     img_shell_charger = load_image_path('shell_charger.png')
-    SHELLS = { "AP" : img_shell_ap, "HP" : img_shell_hp, "MUL" : img_shell_mul, "NUCLEAR" : img_shell_nuclear, "TP" : img_shell_teleport, "HOMING" : img_shell_homing, "FIRE" : img_shell_fire, "VALKYRIE" : img_shell_valkyrie, "DIGGER" : img_shell_digger, "CHARGER" : img_shell_charger}
+    img_shell_strike = load_image_path('shell_strike.png')
+    SHELLS = { "AP" : img_shell_ap, "HP" : img_shell_hp, "MUL" : img_shell_mul, "NUCLEAR" : img_shell_nuclear, "TP" : img_shell_teleport, "HOMING" : img_shell_homing, "FIRE" : img_shell_fire, "VALKYRIE" : img_shell_valkyrie, "DIGGER" : img_shell_digger, "CHARGER" : img_shell_charger, "STRIKE" : img_shell_strike}
     EXPLOSIONS = {
         "AP" : "Explosion",
         "HP" : "Explosion",
@@ -39,6 +41,7 @@ def enter():
         "VALKYRIE" : "Explosion",
         "DIGGER" : "Explosion",
         "CHARGER" : "Explosion",
+        "STRIKE" : "Explosion",
     }
 
     fired_shells = []
@@ -71,6 +74,7 @@ class Shell(object.GameObject):
         "VALKYRIE" : "Valkyrie",
         "DIGGER" : "Digger",
         "CHARGER" : "Charger",
+        "STRIKE" : "Strike",
     }
     MIN_POWER = 0.2
     SIMULATION_t = 0.15
@@ -462,7 +466,25 @@ class Shell_Charger(Shell):
             self.start_theta = self.origin_theta
         super().move()
 
-
+class Shell_Strike(Shell):
+    def explosion(self, head: Vector2):
+        if not self.sub:
+            count = 5
+            distance = 40
+            start_x = head[0] - (count * distance)//2 + distance//2
+            for i in range(count):
+                pos = (start_x + i * distance, 1100)
+                shell = Shell_Strike(self.shell_name, pos, deg_to_theta(-90), .6, delay=0)
+                shell.set_sub()
+                fired_shells.append(shell)
+                object.add_object(shell)
+        super().explosion(head)
+    
+    def move(self):
+        if self.sub:
+            super().move(False)
+        else:
+            super().move()
 
 fired_shells : list[Shell]
 
@@ -475,7 +497,9 @@ def add_shell(shell_name, head_position, theta, power = 1, item = None, target_p
     for i in range(count_shot):
 
         if item == "TP":
-            shell = Shell("TP", head_position, theta, power, delay=delay)
+            shell = Shell(item, head_position, theta, power, delay=delay)
+        elif item == 'STRIKE':
+            shell = Shell_Strike(item, head_position, theta, power, delay=delay)
         elif shell_name == "HOMING":
             shell = Shell_Homing(shell_name, head_position, theta, target_pos, power, delay=delay, id=i)
         elif shell_name == "FIRE":
@@ -497,7 +521,7 @@ def add_shell(shell_name, head_position, theta, power = 1, item = None, target_p
             fired_shells.append(shell)
             object.add_object(shell)
 
-        if item == "TP":
+        if item == "TP" or item == 'STRIKE':
             break
         
         if shell_name == "MUL":
@@ -559,6 +583,9 @@ def add_shell(shell_name, head_position, theta, power = 1, item = None, target_p
         shell.shell_damage = 0
         shell.img_shell = get_shell_image("TP")
         shell.speed = get_attributes("TP")[0] * power
+    elif item == "STRIKE":
+        shell.img_shell = get_shell_image("STRIKE")
+        shell.speed = get_attributes("STRIKE")[0] * power
             
 
 
@@ -624,6 +651,11 @@ def get_attributes(shell_name : str) -> tuple[float, float]:
         shell_damage = 1
         explosion_damage = 1
         explosion_radius = 2
+    elif shell_name == "STRIKE":
+        speed = 350
+        shell_damage = 4
+        explosion_damage = 10
+        explosion_radius = 16
     else:
         assert(0)
 

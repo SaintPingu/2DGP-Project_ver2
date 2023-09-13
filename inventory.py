@@ -78,6 +78,7 @@ class Inven_Item(Inventory):
     image_extension : Image = None
     image_teleport : Image = None
     image_heal : Image = None
+    image_strike : Image = None
     item_table : dict = {}
     items : list
 
@@ -122,7 +123,7 @@ class Inven_Item(Inventory):
             
             gui.gui_weapon.set_item(None)
             gui.gui_weapon.set_image(tank.crnt_shell)
-        elif self.crnt_item == "TP":
+        elif self.crnt_item == "TP" or self.crnt_item == "STRIKE":
             gui.gui_weapon.set_item(None)
             gui.gui_weapon.set_image(item_name)
         else:
@@ -168,12 +169,14 @@ def enter():
     Inven_Item.image_extension = load_image_path('item_extension.png')
     Inven_Item.image_teleport = load_image_path('shell_teleport.png')
     Inven_Item.image_heal = load_image_path('item_heal.png')
+    Inven_Item.image_strike = load_image_path('shell_strike.png')
 
     item_table = {
         'double' : Inven_Item.image_double,
         'extension' : Inven_Item.image_extension,
         'TP' : Inven_Item.image_teleport,
         'heal' : Inven_Item.image_heal,
+        'STRIKE' : Inven_Item.image_strike,
     }
     Inven_Item.item_table.update(item_table)
     Inven_Item.items = [ name for name in Inven_Item.item_table.keys() ]
