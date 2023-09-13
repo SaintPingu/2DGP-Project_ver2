@@ -84,7 +84,6 @@ def draw():
     logo.draw(SCREEN_WIDTH//2, SCREEN_HEIGHT//2)
 
     if font_show_count <= 2:
-        #font.draw(250, 80, "Press Any Key To Start!", (0, 167, 255))
         font.draw(250, 80, "Press Any Key To Start!", (191, 191, 191))
 
     update_canvas()

@@ -499,9 +499,9 @@ def add_shell(shell_name, head_position, theta, power = 1, item = None, target_p
                 fire_delay = delay + ((n*3) / count)
 
                 if -90 < theta_to_degree(theta) < 90:
-                    t = max_t - 0.05 * (n+1)
+                    t = max_t - 0.05 * (n+1) + max_t / 2
                 else:
-                    t = 0.05 * (n+1)
+                    t = 0.05 * (n+1) - max_t / 2
                 if theta < 1 or (58 < theta_to_degree(theta) <90):
                     t -= max_t
                 shell = Shell_Valkyrie(shell_name, head_position, theta + t, power, delay=fire_delay)
