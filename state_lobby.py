@@ -77,10 +77,11 @@ class Button:
         elif self.name == "right":
             map.change(1)
         elif self.name == "start":
-            sound.stop_bgm()
-            framework.change_state(state_battle)
-            sound.play_sound('click')
-            return True
+            if map.t == 0:
+                sound.stop_bgm()
+                framework.change_state(state_battle)
+                sound.play_sound('click')
+                return True
         elif self.name == "easy" or self.name == "normal" or self.name == "hard" or self.name == "god":
             if _crnt_mode == "PVE":
                 _crnt_difficulty = self.name
@@ -376,7 +377,10 @@ def handle_events():
                 for button in _buttons.values():
                     if button.check_select(point) == True:
                         break
-
+        elif event.type == SDL_KEYDOWN:
+            if event.key == SDLK_ESCAPE:
+                import state_title
+                framework.change_state(state_title)
 
 def get_mode():
     return _crnt_mode

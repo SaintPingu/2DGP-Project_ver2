@@ -466,7 +466,6 @@ class Tank_AI(Tank):
             evaluation = (distance / shell.get_attributes(s)[0])
             if evaluation < REACHABLE_EVALUATION: # reachable
                 avaliable_shells.append(s)
-        print(avaliable_shells)
         
         shell_index = random.randint(0, len(avaliable_shells) - 1)
         self.crnt_shell = avaliable_shells[shell_index]
@@ -716,14 +715,14 @@ def handle_event(event):
             crnt_tank.start_move(RIGHT)
         elif event.key == SDLK_LEFT:
             crnt_tank.start_move(LEFT)
-        elif event.key == SDLK_5: # for test
+        elif event.key == SDLK_f: # for test
             crnt_tank.fuel = Tank.MAX_FUEL
-        elif event.key == SDLK_F10:
+        elif event.key == SDLK_F2:
             gui.toggle_gui()
-        elif event.key == SDLK_F8:
+        elif event.key == SDLK_F5:
             tank_list[0].get_damage(999)
             select_tank(None)
-        elif event.key == SDLK_F9:
+        elif event.key == SDLK_F6:
             tank_list[1].get_damage(999)
             select_tank(None)
         elif event.key == SDLK_SPACE:

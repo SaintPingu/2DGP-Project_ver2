@@ -141,6 +141,10 @@ class Shell(object.GameObject):
                     self.t += framework.frame_time
         else:
             self.t += Shell.SIMULATION_t # faster search
+            if self.vector.y < -0.5:
+                self.t += Shell.SIMULATION_t
+                if self.vector.y < -0.75:
+                    self.t += Shell.SIMULATION_t
             
         dest.x = self.origin.x + (self.speed * self.t * math.cos(self.start_theta))
         dest.y = self.origin.y + (self.speed * self.t * math.sin(self.start_theta) - (0.5 * get_gravity() * self.t**2))

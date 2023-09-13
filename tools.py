@@ -76,7 +76,8 @@ class Vector2:
 
     def normalized(self):
         norm = self.get_norm()
-        self /= norm
+        if norm > 0:
+            self /= norm
         return self
 
     def get_norm(self):

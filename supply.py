@@ -15,7 +15,7 @@ _area = 0
 class AirDrop(object.GroundObject):
     image : Image
     image_parachute : Image
-    FALL_SPEED = get_pps(500)
+    FALL_SPEED = get_pps(750)
     def __init__(self, center):
         from inventory import Inven_Item
         super().__init__(AirDrop.image, center, AirDrop.image.w, AirDrop.image.h)
@@ -177,9 +177,8 @@ def draw():
     pass
 
 def reset():
-    if random.randint(0, 2) == 0:
-        pass
-        #create_ship()
+    if random.randint(0, 4) == 0:
+        create_ship()
 
 def create_ship():
     global _ship, _is_supply

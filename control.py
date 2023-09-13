@@ -11,7 +11,7 @@ def app():
 
     window = Tk()
     window.title("조작키")
-    window.geometry('+100+100')
+    window.geometry('+1400+0')
     window.geometry('500x1000')
     window.resizable(False, False)
 
@@ -24,7 +24,7 @@ def app():
     canvas = Canvas(window, width=500, height=1000)  # 캔버스 크기를 이미지 크기에 맞게 조절하세요
     canvas.pack()
     canvas.create_image(0, 0, anchor=NW, image=bg)
-    text_item = canvas.create_text(50, 50, text=string, font=('Consolas, 32'), anchor=NW)
+    text_item = canvas.create_text(50, 50, text=string, font=('Consolas, 16'), anchor=NW, fill='white')
 
     window.mainloop()
 

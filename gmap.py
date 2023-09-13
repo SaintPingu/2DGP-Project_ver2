@@ -194,11 +194,15 @@ def handle_draw_mode_events(events : list):
 def start_draw_mode():
     global is_draw_mode
     is_draw_mode = True
+    import state_battle
+    state_battle.control_debug()
 
 def stop_draw_mode():
     global is_draw_mode, _radius_draw
     _radius_draw = DEFAULT_DRAW_RADIUS
     is_draw_mode = False
+    import state_battle
+    state_battle.control_normal()
 
 def draw_ground(rect : Rect):
     _img_ground.clip_draw(int(rect.origin[0]), int(rect.origin[1]), int(rect.width), int(rect.height), *rect.get_fCenter())
