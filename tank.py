@@ -68,6 +68,7 @@ class Tank(object.GroundObject):
 
         self.test_shell = None
         self.before_power = 0
+        self.before_rects = []
     
     def release(self):
         if tank_list: # death
@@ -157,6 +158,10 @@ class Tank(object.GroundObject):
         self.is_turn = True
         self.inven_item.reset()
         gui.gui_weapon.set_image(self.crnt_shell)
+
+        if self.before_rects:
+            for rect in self.before_rects:
+                gmap.draw_rect(rect)
     
     def move(self):
         if super().move() == True:
@@ -340,10 +345,14 @@ class Tank(object.GroundObject):
         supply.reset()
         self.before_power = gui_gauge.get_filled()
 
+        if self.before_rects:
+            for rect in self.before_rects:
+                gmap.add_invalidate(rect.center, rect.width + 5, rect.height + 5)
+            self.before_rects = []
         if self.test_shell:
             for rect in self.test_shell.test_rects:
                 gmap.add_invalidate(rect.center, rect.width + 5, rect.height + 5)
-            self.test_shell.test_rects = []
+            self.before_rects = self.test_shell.test_rects
     
     def simulate(self, power):
         if self.test_shell:
@@ -788,6 +797,7 @@ def select_tank(tank):
     if crnt_tank is not None:
         if prev_tank:
             prev_tank.deselect()
+        prev_tank = crnt_tank
         crnt_tank.select()
         gui_gauge.reset()
         

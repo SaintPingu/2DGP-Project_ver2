@@ -107,6 +107,7 @@ def draw(is_draw_full=False):
     _rect_inv_list.clear()
 
 
+
 def handle_draw_mode_events(events : list):
     import tank
     global is_draw_mode

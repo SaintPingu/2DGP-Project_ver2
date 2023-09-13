@@ -26,7 +26,8 @@ def enter():
     img_shell_homing = load_image_path('shell_homing.png')
     img_shell_fire = load_image_path('shell_fire.png')
     img_shell_valkyrie = load_image_path('shell_valkyrie.png')
-    SHELLS = { "AP" : img_shell_ap, "HP" : img_shell_hp, "MUL" : img_shell_mul, "NUCLEAR" : img_shell_nuclear, "TP" : img_shell_teleport, "HOMING" : img_shell_homing, "FIRE" : img_shell_fire, "VALKYRIE" : img_shell_valkyrie}
+    img_shell_digger = load_image_path('shell_digger.png')
+    SHELLS = { "AP" : img_shell_ap, "HP" : img_shell_hp, "MUL" : img_shell_mul, "NUCLEAR" : img_shell_nuclear, "TP" : img_shell_teleport, "HOMING" : img_shell_homing, "FIRE" : img_shell_fire, "VALKYRIE" : img_shell_valkyrie, "DIGGER" : img_shell_digger}
     EXPLOSIONS = {
         "AP" : "Explosion",
         "HP" : "Explosion",
@@ -35,6 +36,7 @@ def enter():
         "HOMING" : "Explosion",
         "FIRE" : "Explosion",
         "VALKYRIE" : "Explosion",
+        "DIGGER" : "Explosion",
     }
 
     fired_shells = []
@@ -65,6 +67,7 @@ class Shell(object.GameObject):
         "HOMING" : "Homing",
         "FIRE" : "Fire",
         "VALKYRIE" : "Valkyrie",
+        "DIGGER" : "Digger",
     }
     MIN_POWER = 0.2
     SIMULATION_t = 0.15
@@ -125,6 +128,10 @@ class Shell(object.GameObject):
         # Use projectile moition formula
         if not self.is_simulation:
             self.t += (self.speed/20 * framework.frame_time)
+            if self.vector.y < -0.5:
+                self.t += framework.frame_time
+                if self.vector.y < -0.75:
+                    self.t += framework.frame_time
         else:
             self.t += Shell.SIMULATION_t # faster search
             
@@ -410,7 +417,29 @@ class Shell_Valkyrie(Shell):
         self.set_center(dest)
 
 
+class Shell_Digger(Shell):
+    def init(self, count):
+        self.count = count
+        self.fall_speed = 4
 
+    def move(self):
+        if self.sub:
+            super().move(False)
+            self.t += framework.frame_time * self.fall_speed
+        else:
+            super().move()
+
+    def explosion(self, head : Vector2):
+        if self.count > 0:
+            shell = Shell_Digger("DIGGER", head, deg_to_theta(90), 0.2, delay=0)
+            shell.init(self.count - 1)
+            shell.set_sub()
+            shell.explosion_radius = self.explosion_radius - 1
+            if shell.explosion_radius <= 2:
+                shell.explosion_radius = 2
+            fired_shells.append(shell)
+            object.add_object(shell)
+        super().explosion(head)
 
 
 
@@ -418,8 +447,6 @@ class Shell_Valkyrie(Shell):
 fired_shells : list[Shell]
 
 def add_shell(shell_name, head_position, theta, power = 1, item = None, target_pos=None):
-    if power < 0.2:
-        power = 0.2
     delay = 0
     count_shot = 1
     if item == "double":
@@ -437,6 +464,9 @@ def add_shell(shell_name, head_position, theta, power = 1, item = None, target_p
             shell.set_item(item)
         elif shell_name == "VALKYRIE":
             shell = None
+        elif shell_name == "DIGGER":
+            shell = Shell_Digger(shell_name, head_position, theta, power, delay=delay)
+            shell.init(6)
         else:
             shell = Shell(shell_name, head_position, theta, power, delay=delay)
 
@@ -541,13 +571,18 @@ def get_attributes(shell_name : str) -> tuple[float, float]:
     elif shell_name == "FIRE":
         speed = 375
         shell_damage = 2
-        explosion_damage = 15
+        explosion_damage = 13
         explosion_radius = 6
     elif shell_name == "VALKYRIE":
         speed = 300
         shell_damage = 8
         explosion_damage = 2
         explosion_radius = 2
+    elif shell_name == "DIGGER":
+        speed = 350
+        shell_damage = 2
+        explosion_damage = 3
+        explosion_radius = 10
     else:
         assert(0)
 

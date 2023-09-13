@@ -78,10 +78,10 @@ class Wind:
         import gui
         self.image_cloud = load_image_path('gui_cloud.png')
         self.image_wind = load_image_path('gui_wind_lines.png')
-        pos_cloud = (SCREEN_WIDTH//2, SCREEN_HEIGHT - self.image_cloud.h)
-        self.wind_pos_left = (pos_cloud[0] - self.image_cloud.w, pos_cloud[1])
-        self.wind_pos_right = (pos_cloud[0] + self.image_cloud.w, pos_cloud[1])
-        gui_cloud = gui.GUI(self.image_cloud, pos_cloud)
+        self.pos_cloud = (SCREEN_WIDTH//2, SCREEN_HEIGHT - self.image_cloud.h)
+        self.wind_pos_left = (self.pos_cloud[0] - self.image_cloud.w, self.pos_cloud[1])
+        self.wind_pos_right = (self.pos_cloud[0] + self.image_cloud.w, self.pos_cloud[1])
+        gui_cloud = gui.GUI(self.image_cloud, self.pos_cloud)
         self.gui_wind = gui.GUI(self.image_wind, is_draw=False)
         gui.add_gui(gui_cloud, 1)
         gui.add_gui(self.gui_wind, 1)
@@ -181,3 +181,6 @@ def get_wind():
     if crnt_map_index not in NO_WIND_MAPS:
         return wind.get_wind()
     return 0
+
+def draw_wind_amount(font):
+    font.draw(wind.pos_cloud[0] - 20, wind.pos_cloud[1], str(int(wind.get_wind())),(255,255,255))

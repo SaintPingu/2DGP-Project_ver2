@@ -45,7 +45,6 @@ class GUI_HP(GUI):
 
         super().__init__(GUI_HP.image)
         self.owner = owner
-        self.max_hp = owner.hp
         self.max_width = GUI_HP.image.w
         self.width = GUI_HP.image.w
         self.height = GUI_HP.image.h
@@ -60,7 +59,7 @@ class GUI_HP(GUI):
             self.image.draw(*self.position, self.width, self.height)
 
         if self.owner == get_crnt_tank() or self.owner == get_prev_tank():
-            w = GUI_HP.image_control.w * (self.owner.hp / self.max_hp)
+            w = GUI_HP.image_control.w * (self.owner.hp / self.owner.max_hp)
             GUI_HP.image_control.draw(*GUI_HP.position_control, w, GUI_HP.image_control.h)
     
     def update(self):
@@ -71,7 +70,7 @@ class GUI_HP(GUI):
         gmap.set_invalidate_rect(GUI_HP.position_control, GUI_HP.image_control.w, GUI_HP.image_control.h, grid_size=0)
     
     def update_gauge(self):
-        self.width = self.max_width * (self.owner.hp / self.max_hp)
+        self.width = self.max_width * (self.owner.hp / self.owner.max_hp)
 
 class GUI_Select_Tank(GUI):
     def __init__(self, image: Image):
@@ -318,6 +317,10 @@ def draw():
         gui.draw()
 
     draw_degree()
+
+    import environment
+    environment.draw_wind_amount(degree_font)
+
 
 def add_gui(gui : GUI, depth):
     _list_gui[depth].append(gui)
