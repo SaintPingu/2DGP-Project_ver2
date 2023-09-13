@@ -240,6 +240,9 @@ def set_check_pos():
 
 
 def enter():
+    import state_challenge_lobby
+    state_challenge_lobby._is_challenge = False
+
     # images
     global _background, _image_check, _image_green_light, _image_red_light
     _background = load_image_path('lobby.png')

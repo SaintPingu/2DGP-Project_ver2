@@ -766,6 +766,11 @@ def handle_event(event):
 
 def new_tank():
     tank = Tank()
+    tank.add_item('double')
+    tank.add_item('extension')
+    tank.add_item('heal')
+    tank.add_item('TP')
+    tank.add_item('STRIKE')
     tank.index = len(tank_list)
     tank_list.append(tank)
     object.add_object(tank)
