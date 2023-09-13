@@ -27,7 +27,8 @@ def enter():
     img_shell_fire = load_image_path('shell_fire.png')
     img_shell_valkyrie = load_image_path('shell_valkyrie.png')
     img_shell_digger = load_image_path('shell_digger.png')
-    SHELLS = { "AP" : img_shell_ap, "HP" : img_shell_hp, "MUL" : img_shell_mul, "NUCLEAR" : img_shell_nuclear, "TP" : img_shell_teleport, "HOMING" : img_shell_homing, "FIRE" : img_shell_fire, "VALKYRIE" : img_shell_valkyrie, "DIGGER" : img_shell_digger}
+    img_shell_charger = load_image_path('shell_charger.png')
+    SHELLS = { "AP" : img_shell_ap, "HP" : img_shell_hp, "MUL" : img_shell_mul, "NUCLEAR" : img_shell_nuclear, "TP" : img_shell_teleport, "HOMING" : img_shell_homing, "FIRE" : img_shell_fire, "VALKYRIE" : img_shell_valkyrie, "DIGGER" : img_shell_digger, "CHARGER" : img_shell_charger}
     EXPLOSIONS = {
         "AP" : "Explosion",
         "HP" : "Explosion",
@@ -37,6 +38,7 @@ def enter():
         "FIRE" : "Explosion",
         "VALKYRIE" : "Explosion",
         "DIGGER" : "Explosion",
+        "CHARGER" : "Explosion",
     }
 
     fired_shells = []
@@ -68,6 +70,7 @@ class Shell(object.GameObject):
         "FIRE" : "Fire",
         "VALKYRIE" : "Valkyrie",
         "DIGGER" : "Digger",
+        "CHARGER" : "Charger",
     }
     MIN_POWER = 0.2
     SIMULATION_t = 0.15
@@ -240,7 +243,8 @@ class Shell(object.GameObject):
         if self.is_teleport:
             tank.teleport(head)
         else:
-            gmap.draw_block(self.explosion_radius, head, False)
+            if self.shell_name != "CHARGER":
+                gmap.draw_block(self.explosion_radius, head, False)
             tank.check_explosion(head, self.explosion_radius, self.explosion_damage)
             object.check_ground(head, self.explosion_radius + 10)
             sprite.add_animation(EXPLOSIONS[self.shell_name], head, scale=self.explosion_radius/10)
@@ -442,6 +446,22 @@ class Shell_Digger(Shell):
         super().explosion(head)
 
 
+class Shell_Charger(Shell):
+    def init(self, theta):
+        self.start_vector = self.vector
+        self.x_speed = 1.5
+        self.merge_speed = 0.15
+        self.origin_theta = theta
+    
+    def move(self):
+        delta_theta = self.start_theta - self.origin_theta
+        if abs(delta_theta) > 0.01:
+            s = get_sign(delta_theta)
+            self.start_theta -= framework.frame_time * s * self.merge_speed
+        else:
+            self.start_theta = self.origin_theta
+        super().move()
+
 
 
 fired_shells : list[Shell]
@@ -462,7 +482,7 @@ def add_shell(shell_name, head_position, theta, power = 1, item = None, target_p
             shell = Shell_Fire(shell_name, head_position, theta, power, delay=delay)
             shell.set_parent()
             shell.set_item(item)
-        elif shell_name == "VALKYRIE":
+        elif shell_name == "VALKYRIE" or shell_name == "CHARGER":
             shell = None
         elif shell_name == "DIGGER":
             shell = Shell_Digger(shell_name, head_position, theta, power, delay=delay)
@@ -511,6 +531,22 @@ def add_shell(shell_name, head_position, theta, power = 1, item = None, target_p
                 object.add_object(shell)
             
             delay += 1
+        elif shell_name == "CHARGER":
+            pos = Vector2(*head_position)
+            count = 20
+            max_t = 0.05 * (count+1)
+            for n in range(count):
+                if -90 < theta_to_degree(theta) < 90:
+                    t = max_t - 0.05 * (n+1) + max_t / 2
+                else:
+                    t = 0.05 * (n+1) - max_t / 2
+                if theta < 1 or (58 < theta_to_degree(theta) <90):
+                    t -= max_t
+                shell = Shell_Charger(shell_name, pos, theta + t, power, delay=delay)
+                shell.init(theta)
+                shell.set_sub()
+                fired_shells.append(shell)
+                object.add_object(shell)
 
         delay += 2
 
@@ -565,7 +601,7 @@ def get_attributes(shell_name : str) -> tuple[float, float]:
         speed = 330
     elif shell_name == "HOMING":
         speed = 400
-        shell_damage = 11
+        shell_damage = 7
         explosion_damage = 2
         explosion_radius = 5
     elif shell_name == "FIRE":
@@ -583,6 +619,11 @@ def get_attributes(shell_name : str) -> tuple[float, float]:
         shell_damage = 2
         explosion_damage = 3
         explosion_radius = 10
+    elif shell_name == "CHARGER":
+        speed = 350
+        shell_damage = 1
+        explosion_damage = 1
+        explosion_radius = 2
     else:
         assert(0)
 

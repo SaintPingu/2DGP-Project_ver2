@@ -183,4 +183,5 @@ def get_wind():
     return 0
 
 def draw_wind_amount(font):
-    font.draw(wind.pos_cloud[0] - 20, wind.pos_cloud[1], str(int(wind.get_wind())),(255,255,255))
+    if wind:
+        font.draw(wind.pos_cloud[0] - 20, wind.pos_cloud[1], str(int(wind.get_wind())),(255,255,255))

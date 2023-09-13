@@ -248,6 +248,8 @@ deg_pos : Vector2
 deg_prev_pos : tuple
 deg : float = 0
 
+is_draw_wind = True
+
 def enter():
     global _list_gui
     _list_gui = [[],[]]
@@ -276,6 +278,19 @@ def enter():
     global deg_pos, deg_prev_pos
     deg_pos = Vector2()
     deg_prev_pos = (0, 0)
+
+    import state_lobby, state_challenge_lobby
+    if state_challenge_lobby._is_challenge:
+        crnt_map_index = state_challenge_lobby.get_map_index() - 1
+    else:
+        crnt_map_index = state_lobby.crnt_map_index
+
+    global is_draw_wind
+    if crnt_map_index == 3:
+        is_draw_wind = False
+    else:
+        is_draw_wind = True
+    
     
 def exit():
     global _list_gui
@@ -318,8 +333,9 @@ def draw():
 
     draw_degree()
 
-    import environment
-    environment.draw_wind_amount(degree_font)
+    if is_draw_wind:
+        import environment    
+        environment.draw_wind_amount(degree_font)
 
 
 def add_gui(gui : GUI, depth):

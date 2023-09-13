@@ -460,22 +460,23 @@ class Tank_AI(Tank):
         distance = math.fabs(self.get_dx())
 
         avaliable_shells = ["AP"]
-        shells = ["HP", "MUL", "NUCLEAR"]
+        shells = [ "HP", "MUL", "NUCLEAR", "HOMING", "FIRE", "VALKYRIE", "DIGGER", "CHARGER" ]
 
         for s in shells:
             evaluation = (distance / shell.get_attributes(s)[0])
             # print(evaluation)
             if evaluation < REACHABLE_EVALUATION: # reachable
                 avaliable_shells.append(s)
+        print(avaliable_shells)
+        # if (distance / shell.get_attributes("MUL")[0]) < REACHABLE_EVALUATION / 3:
+        #     avaliable_shells.append("MUL")
         
-        if (distance / shell.get_attributes("MUL")[0]) < REACHABLE_EVALUATION / 3:
-            avaliable_shells.append("MUL")
-        
-        if random.randint(0, 1) == 0: # 50% chance to get homing
-            avaliable_shells.append("HOMING")
+        # if random.randint(0, 1) == 0:
+        #     avaliable_shells.append("HOMING")
         
         shell_index = random.randint(0, len(avaliable_shells) - 1)
         self.crnt_shell = avaliable_shells[shell_index]
+        self.crnt_shell = "VALKYRIE"
         self.shell_selected = True
         gui.gui_weapon.set_image(self.crnt_shell)
 
