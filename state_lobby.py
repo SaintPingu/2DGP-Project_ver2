@@ -20,6 +20,8 @@ _font : Font
 # images
 _background : Image
 _image_check : Image
+_image_green_light : Image
+_image_red_light : Image
 _check_pos_mode : tuple
 _check_pos_diff : tuple
 
@@ -205,6 +207,8 @@ class MAP():
             
 
     def change(self, dir):
+        if self.t != 0:
+            return
         next_index = self.index + dir
         # if next_index < 0 or next_index >= len(_image_maps):
         #     return
@@ -236,9 +240,11 @@ def set_check_pos():
 
 def enter():
     # images
-    global _background, _image_check
+    global _background, _image_check, _image_green_light, _image_red_light
     _background = load_image_path('lobby.png')
     _image_check = load_image_path('lobby_icon_check.png')
+    _image_green_light = load_image_path('green_light.png')
+    _image_red_light = load_image_path('red_light.png')
 
     # button images
     image_pvp = load_image_path('lobby_button_pvp.png')
@@ -253,7 +259,7 @@ def enter():
     button_challenge = Button("CHALLENGE", image_challenge, (1000, 880))
     button_left = Button("left", image_arrow, (200, 450), 'h')
     button_right = Button("right", image_arrow, (200 + 630, 450))
-    button_start = Button("start", image_start, (515, 125))
+    button_start = Button("start", image_start, (515, 100))
     button_easy = Button("easy", image_selection, (1010, 450))
     button_normal = Button("normal", image_selection, (1010, 450 - 100))
     button_hard = Button("hard", image_selection, (1010, 450 - 200))
@@ -324,6 +330,9 @@ def exit():
         del effect
     effects.clear()
 
+    global _image_green_light, _image_red_light
+    del _image_green_light, _image_red_light
+
 def update():
     map.update()
 
@@ -331,6 +340,16 @@ def draw():
     clear_canvas()
     _background.draw(SCREEN_WIDTH//2, SCREEN_HEIGHT//2)
     map.draw()
+
+    start_x = 450
+    for i in range(NUM_OF_MAP):
+        if i != map.index:
+            image = _image_red_light
+        else:
+            image = _image_green_light
+        image.draw(start_x + i * 35, 180)
+
+
 
     global _buttons
     for button in _buttons.values():

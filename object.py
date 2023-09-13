@@ -49,6 +49,11 @@ class GameObject:
         self.center.x += dx
         self.center.y += dy
         self.update_object()
+    
+    def offset_vector(self, vector):
+        self.center.x += vector.x
+        self.center.y += vector.x
+        self.update_object()
 
     def set_center(self, center):
         self.center.x = center[0]

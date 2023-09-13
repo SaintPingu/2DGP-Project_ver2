@@ -152,10 +152,6 @@ class Tank(object.GroundObject):
         self.is_locked = False
         self.fuel = Tank.MAX_FUEL
         gui.reset_degree()
-
-        if self.test_shell:
-            for rect in self.test_shell.test_rects:
-                gmap.add_invalidate(rect.center, rect.width + 5, rect.height + 5)
         
     def select(self):
         self.is_turn = True
@@ -343,6 +339,11 @@ class Tank(object.GroundObject):
         shell.play_fire_sound(self.crnt_shell)
         supply.reset()
         self.before_power = gui_gauge.get_filled()
+
+        if self.test_shell:
+            for rect in self.test_shell.test_rects:
+                gmap.add_invalidate(rect.center, rect.width + 5, rect.height + 5)
+            self.test_shell.test_rects = []
     
     def simulate(self, power):
         if self.test_shell:

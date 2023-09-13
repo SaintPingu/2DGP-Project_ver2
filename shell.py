@@ -25,7 +25,8 @@ def enter():
     img_shell_teleport = load_image_path('shell_teleport.png')
     img_shell_homing = load_image_path('shell_homing.png')
     img_shell_fire = load_image_path('shell_fire.png')
-    SHELLS = { "AP" : img_shell_ap, "HP" : img_shell_hp, "MUL" : img_shell_mul, "NUCLEAR" : img_shell_nuclear, "TP" : img_shell_teleport, "HOMING" : img_shell_homing, "FIRE" : img_shell_fire}
+    img_shell_valkyrie = load_image_path('shell_valkyrie.png')
+    SHELLS = { "AP" : img_shell_ap, "HP" : img_shell_hp, "MUL" : img_shell_mul, "NUCLEAR" : img_shell_nuclear, "TP" : img_shell_teleport, "HOMING" : img_shell_homing, "FIRE" : img_shell_fire, "VALKYRIE" : img_shell_valkyrie}
     EXPLOSIONS = {
         "AP" : "Explosion",
         "HP" : "Explosion",
@@ -33,6 +34,7 @@ def enter():
         "NUCLEAR" : "Explosion_Nuclear",
         "HOMING" : "Explosion",
         "FIRE" : "Explosion",
+        "VALKYRIE" : "Explosion",
     }
 
     fired_shells = []
@@ -62,6 +64,7 @@ class Shell(object.GameObject):
         "TP" : "Teleport",
         "HOMING" : "Homing",
         "FIRE" : "Fire",
+        "VALKYRIE" : "Valkyrie",
     }
     MIN_POWER = 0.2
     SIMULATION_t = 0.15
@@ -357,7 +360,54 @@ class Shell_Fire(Shell):
             return True
         
 
+class Shell_Valkyrie(Shell):
+    def init(self):
+        self.stop = False
+        if self.vector.y > 0.7 or self.vector.y < -0.7:
+            self.stop = True
 
+        self.y_err = 0
+        self.inc = True
+        self.max_y = 1.5
+        self.min_y = -1.5
+        self.rotation_speed = 10
+        if self.speed < 30:
+            self.max_y = 0.2
+            self.min_y = 0.2
+            self.rotation_speed = 1
+        self.real_origin = self.origin
+
+    def move(self, is_affected_wind=True):
+        if not self.stop:
+            if self.inc:
+                self.y_err += framework.frame_time * self.rotation_speed
+                if self.y_err > self.max_y:
+                    self.inc = False
+            else:
+                self.y_err -= framework.frame_time * self.rotation_speed
+                if self.y_err < self.min_y:
+                    self.inc = True
+
+            self.origin.y = self.real_origin.y + self.y_err
+        elif abs(self.vector.x) > 0.3 and self.vector.y < 0.6 and self.vector.y > -0.6:
+            self.stop = False
+
+        from state_battle import get_gravity
+        dest = Vector2()
+        
+        if not self.is_simulation:
+            self.t += (self.speed/20 * framework.frame_time)
+        else:
+            self.t += Shell.SIMULATION_t # faster search
+            
+        dest.x = self.origin.x + (self.speed * self.t * math.cos(self.start_theta))
+        dest.y = self.origin.y + (self.speed * self.t * math.sin(self.start_theta) - (0.5 * get_gravity() * self.t**2))
+
+        if is_affected_wind:
+            dest.x += gmap.env.get_wind() * self.t
+
+        self.vector = self.vector.get_rotated_dest(self.center, dest)
+        self.set_center(dest)
 
 
 
@@ -368,10 +418,12 @@ class Shell_Fire(Shell):
 fired_shells : list[Shell]
 
 def add_shell(shell_name, head_position, theta, power = 1, item = None, target_pos=None):
+    if power < 0.2:
+        power = 0.2
     delay = 0
     count_shot = 1
     if item == "double":
-        count_shot = 2
+        count_shot += 1
 
     for i in range(count_shot):
 
@@ -383,21 +435,24 @@ def add_shell(shell_name, head_position, theta, power = 1, item = None, target_p
             shell = Shell_Fire(shell_name, head_position, theta, power, delay=delay)
             shell.set_parent()
             shell.set_item(item)
+        elif shell_name == "VALKYRIE":
+            shell = None
         else:
             shell = Shell(shell_name, head_position, theta, power, delay=delay)
 
-        shell_head = shell.get_head()
-        position = head_position + (head_position - shell_head)
-        shell.set_pos(position)
-        fired_shells.append(shell)
-        object.add_object(shell)
+        if shell:
+            shell_head = shell.get_head()
+            position = head_position + (head_position - shell_head)
+            shell.set_pos(position)
+            fired_shells.append(shell)
+            object.add_object(shell)
 
         if item == "TP":
             break
         
         if shell_name == "MUL":
             for n in range(3):
-                t = 0.1 * (n+1)
+                t = 0.05 * (n+1)
                 shell_1 = Shell(shell_name, position, theta + t, power, delay=delay)
                 shell_2 = Shell(shell_name, position, theta - t, power, delay=delay)
                 shell_1.set_sub()
@@ -406,6 +461,26 @@ def add_shell(shell_name, head_position, theta, power = 1, item = None, target_p
                 fired_shells.append(shell_2)
                 object.add_object(shell_1)
                 object.add_object(shell_2)
+        elif shell_name == "VALKYRIE":
+            count = 10
+            max_t = 0.05 * (count+1)
+                
+            for n in range(count):
+                fire_delay = delay + ((n*3) / count)
+
+                if -90 < theta_to_degree(theta) < 90:
+                    t = max_t - 0.05 * (n+1)
+                else:
+                    t = 0.05 * (n+1)
+                if theta < 1 or (58 < theta_to_degree(theta) <90):
+                    t -= max_t
+                shell = Shell_Valkyrie(shell_name, head_position, theta + t, power, delay=fire_delay)
+                shell.init()
+                shell.set_sub()
+                fired_shells.append(shell)
+                object.add_object(shell)
+            
+            delay += 1
 
         delay += 2
 
@@ -460,14 +535,19 @@ def get_attributes(shell_name : str) -> tuple[float, float]:
         speed = 330
     elif shell_name == "HOMING":
         speed = 400
-        shell_damage = 15
+        shell_damage = 11
         explosion_damage = 2
         explosion_radius = 5
     elif shell_name == "FIRE":
         speed = 375
-        shell_damage = 1
-        explosion_damage = 12
+        shell_damage = 2
+        explosion_damage = 15
         explosion_radius = 6
+    elif shell_name == "VALKYRIE":
+        speed = 300
+        shell_damage = 8
+        explosion_damage = 2
+        explosion_radius = 2
     else:
         assert(0)
 

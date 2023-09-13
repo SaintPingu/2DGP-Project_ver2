@@ -265,6 +265,12 @@ def toggle_debug_mode():
     global _is_debug_mode
     _is_debug_mode = not _is_debug_mode
 
+def deg_to_theta(degree):
+    return degree * math.pi / 180
+
+def theta_to_degree(theta):
+    return theta * 180 / math.pi
+
 def point_in_rect(point, rect : Rect):
     if (point[0] > rect.left and point[0] < rect.right) and (point[1] < rect.top and point[1] > rect.bottom):
         return True

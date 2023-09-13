@@ -2,6 +2,7 @@ from tools import *
 import gmap
 import framework
 import state_lobby
+import state_challenge_lobby
 
 TIME_FOR_ENDING = 10
 TEXT_POS_Y = 800
@@ -34,14 +35,22 @@ def update():
 def draw(winner):
     global _winner
     _winner = winner
-    if state_lobby.crnt_map_index == 0:
+
+    if state_challenge_lobby._is_challenge:
+        crnt_map_index = state_challenge_lobby.get_map_index() - 1
+    else:
+        crnt_map_index = state_lobby.crnt_map_index
+
+    if crnt_map_index == 0:
         rgb = (255, 255, 255)
-    elif state_lobby.crnt_map_index == 1:
+    elif crnt_map_index == 1:
         rgb = (255, 255, 0)
-    elif state_lobby.crnt_map_index == 2:
+    elif crnt_map_index == 2:
         rgb = (0, 167, 255)
-    elif state_lobby.crnt_map_index == 3:
+    elif crnt_map_index == 3:
         rgb = (37, 65, 255)
+    elif crnt_map_index == 4:
+        rgb = (205, 0, 0)
     else:
         assert(0)
 
