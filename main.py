@@ -2,7 +2,7 @@ from tools import *
 import framework
 import state_title
 
-
+os.chdir(os.path.dirname(__file__))
 import control
 if __name__ == '__main__':
     control.start()
